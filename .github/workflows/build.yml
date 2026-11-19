@@ -1,0 +1,36 @@
+
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate with SonarQube
+        uses: SonarSource/sonarqube-auth-action@v1
+        id: auth
+
+      - name: Run SonarQube analysis
+        uses: SonarSource/sonarqube-scan-action@v8
+        with:
+          projectBaseDir: NatyMoonApp
+          args: >
+            -Dsonar.organization=${{ steps.auth.outputs.organization }}
+            -Dsonar.projectKey=${{ steps.auth.outputs.project-key }}
