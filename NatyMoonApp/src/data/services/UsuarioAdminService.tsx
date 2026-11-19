@@ -10,33 +10,30 @@ export type CrearStaffInput = {
   rolNombre: 'ADMIN' | 'EMPLEADO';
 };
 
+
+
+const NO_DISPONIBLE =
+  'Esta opción todavía no está disponible: el servidor no permite hacerlo por ahora.';
+
 export const UsuarioAdminService = {
 
-  // GET /api/usuarios (ADMIN)
+ 
   async listar(token: string): Promise<UsuarioAdmin[]> {
     return await apiFetch<UsuarioAdmin[]>('/api/usuarios', { token });
   },
 
-  // PATCH /api/usuarios/{id}/estado  body: { activo: boolean }
   async cambiarEstado(id: number, activo: boolean, token: string): Promise<UsuarioAdmin> {
-    return await apiFetch<UsuarioAdmin>(`/api/usuarios/${id}/estado`, {
-      method: 'PATCH',
-      body: { activo },
-      token,
-    });
+    
+    throw new Error(NO_DISPONIBLE);
   },
 
-  // DELETE /api/usuarios/{id}
+  
   async eliminar(id: number, token: string): Promise<void> {
     await apiFetch<void>(`/api/usuarios/${id}`, { method: 'DELETE', token });
   },
 
-  // POST /api/usuarios/staff (crea ADMIN o EMPLEADO con contraseña real)
   async crearStaff(input: CrearStaffInput, token: string): Promise<UsuarioAdmin> {
-    return await apiFetch<UsuarioAdmin>('/api/usuarios/staff', {
-      method: 'POST',
-      body: input,
-      token,
-    });
+    
+    throw new Error(NO_DISPONIBLE);
   },
 };

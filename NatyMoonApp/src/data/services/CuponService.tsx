@@ -1,19 +1,31 @@
 import { apiFetch } from '../api/httpClient';
 import { Cupon, CuponInput } from '../../Domain/entities/Cupon';
 
+const estaVigente = (cupon: Cupon): boolean => {
+  const ahora = new Date();
+
+  return (
+    cupon.activo &&
+    new Date(cupon.fechaInicio) <= ahora &&
+    new Date(cupon.fechaFin) >= ahora &&
+    (cupon.usoMaximo == null || cupon.usosActuales < cupon.usoMaximo)
+  );
+};
+
 export const CuponService = {
 
-  // Cualquier autenticado - GET /api/cupones/activos
+  // Cualquier autenticado
   async listarActivos(token: string): Promise<Cupon[]> {
-    return await apiFetch<Cupon[]>('/api/cupones/activos', { token });
+ 
+    const todos = await apiFetch<Cupon[]>('/api/cupones', { token });
+    return todos.filter(estaVigente);
   },
 
-  // ADMIN - GET /api/cupones
   async listarTodos(token: string): Promise<Cupon[]> {
     return await apiFetch<Cupon[]>('/api/cupones', { token });
   },
 
-  // ADMIN - POST /api/cupones
+  
   async crear(input: CuponInput, token: string): Promise<Cupon> {
     return await apiFetch<Cupon>('/api/cupones', {
       method: 'POST',
@@ -22,16 +34,16 @@ export const CuponService = {
     });
   },
 
-  // ADMIN - PUT /api/cupones/{id}
   async actualizar(id: number, input: CuponInput, token: string): Promise<Cupon> {
+    
+    const actual = await apiFetch<Record<string, any>>(`/api/cupones/${id}`, { token });
+
     return await apiFetch<Cupon>(`/api/cupones/${id}`, {
       method: 'PUT',
-      body: input,
+      body: { ...actual, ...input },
       token,
     });
   },
-
-  // ADMIN - DELETE /api/cupones/{id}
   async eliminar(id: number, token: string): Promise<void> {
     await apiFetch<void>(`/api/cupones/${id}`, { method: 'DELETE', token });
   },

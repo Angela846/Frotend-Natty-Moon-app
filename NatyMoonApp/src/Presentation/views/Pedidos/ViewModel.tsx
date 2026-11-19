@@ -24,7 +24,7 @@ export const usePedidosViewModel = () => {
       const data = await OrdenService.misOrdenes(user.token);
       setOrdenes(data);
     } catch (error) {
-      console.log('Error al cargar pedidos:', error);
+      if (__DEV__) console.log('Error al cargar pedidos:', error);
       setOrdenes([]);
     } finally {
       setLoading(false);

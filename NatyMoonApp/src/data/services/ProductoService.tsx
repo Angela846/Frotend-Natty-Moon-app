@@ -10,10 +10,10 @@ import {
   mapProducto,
 } from '../../Domain/entities/Producto';
 
-// El backend expone productos, variantes e imágenes como tablas separadas
-// (sin JOIN). Este service las trae todas y las combina en memoria para
-// que el resto de la app pueda seguir trabajando con un único objeto
-// "Product" (como antes), sin tener que pensar en 3 llamadas distintas.
+
+const MAX_LARGO_URL_IMAGEN = 500;
+
+
 async function cargarTodoElCatalogo(): Promise<{
   productos: ProductoResponse[];
   variantes: VarianteProductoResponse[];
@@ -68,9 +68,12 @@ export const ProductoService = {
   },
 
   async actualizar(id: number, input: ProductoInput, token: string): Promise<ProductoResponse> {
+    
+    const actual = await apiFetch<Record<string, any>>(`/api/productos/${id}`);
+
     return await apiFetch<ProductoResponse>(`/api/productos/${id}`, {
       method: 'PUT',
-      body: input,
+      body: { ...actual, ...input },
       token,
     });
   },
@@ -79,7 +82,6 @@ export const ProductoService = {
     await apiFetch<void>(`/api/productos/${id}`, { method: 'DELETE', token });
   },
 
-  // ===== Variantes (talla / color / stock) =====
 
   async crearVariante(input: VarianteProductoInput, token: string): Promise<VarianteProductoResponse> {
     return await apiFetch<VarianteProductoResponse>('/api/variantes-producto', {
@@ -105,16 +107,25 @@ export const ProductoService = {
     await apiFetch<void>(`/api/variantes-producto/${id}`, { method: 'DELETE', token });
   },
 
-  // ===== Imagen (una sola por producto, por simplicidad) =====
+
 
   async fijarImagen(productoId: number, url: string, token: string): Promise<void> {
+
+    // La columna url es VARCHAR(500): una foto en base64 no cabe.
+    if (url.length > 500) {
+      throw new Error(
+        'El producto se guardó, pero la foto es muy pesada para el servidor. Usa una URL de imagen (https://...).'
+      );
+    }
+
     const imagenes = await apiFetch<ImagenProductoResponse[]>('/api/imagenes-producto');
     const existente = imagenes.find((img) => img.producto.id === productoId);
 
     if (existente) {
+     
       await apiFetch(`/api/imagenes-producto/${existente.id}`, {
         method: 'PUT',
-        body: { producto: { id: productoId }, url, esPrincipal: true, orden: 1 },
+        body: { ...existente, producto: { id: productoId }, url, esPrincipal: true, orden: 1 },
         token,
       });
     } else {

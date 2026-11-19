@@ -1,32 +1,51 @@
-import { apiFetch } from '../api/httpClient';
+import { apiFetch, obtenerIdUsuarioActual } from '../api/httpClient';
 import { CrearNovedadInput, EstadoNovedad, Novedad } from '../../Domain/entities/Novedad';
+
 
 export const NovedadService = {
 
-  // Cliente: GET /api/novedades/mias
+  // Cliente
   async misNovedades(token: string): Promise<Novedad[]> {
-    return await apiFetch<Novedad[]>('/api/novedades/mias', { token });
+    
+    const [miId, todas] = await Promise.all([
+      obtenerIdUsuarioActual(),
+      apiFetch<Novedad[]>('/api/novedades', { token }),
+    ]);
+
+    return todas.filter((n) => n.usuario?.id === miId);
   },
 
-  // Cliente: POST /api/novedades/mias
+  
   async crear(input: CrearNovedadInput, token: string): Promise<Novedad> {
-    return await apiFetch<Novedad>('/api/novedades/mias', {
+    
+    const miId = await obtenerIdUsuarioActual();
+
+    return await apiFetch<Novedad>('/api/novedades', {
       method: 'POST',
-      body: input,
+      body: {
+        usuario: { id: miId },
+        orden: input.ordenId ? { id: input.ordenId } : null,
+        asunto: input.asunto,
+        descripcion: input.descripcion,
+        estado: 'ABIERTA',
+      },
       token,
     });
   },
 
-  // Staff: GET /api/novedades
+ 
   async listarTodas(token: string): Promise<Novedad[]> {
     return await apiFetch<Novedad[]>('/api/novedades', { token });
   },
 
-  // Staff: PUT /api/novedades/{id}/responder
+ 
   async responder(id: number, estado: EstadoNovedad, respuesta: string, token: string): Promise<Novedad> {
-    return await apiFetch<Novedad>(`/api/novedades/${id}/responder`, {
+   
+    const actual = await apiFetch<Record<string, any>>(`/api/novedades/${id}`, { token });
+
+    return await apiFetch<Novedad>(`/api/novedades/${id}`, {
       method: 'PUT',
-      body: { estado, respuesta },
+      body: { ...actual, estado, respuesta },
       token,
     });
   },

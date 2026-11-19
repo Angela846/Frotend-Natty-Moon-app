@@ -55,7 +55,7 @@ const Reportes = () => {
       const data = await ReporteService.obtenerResumen(user.token);
       setResumen(data);
     } catch (error) {
-      console.log('Error al cargar reportes:', error);
+      if (__DEV__) console.log('Error al cargar reportes:', error);
     } finally {
       setLoading(false);
     }

@@ -24,7 +24,7 @@ export const useBuscarViewModel = () => {
         const data = await ProductoService.listar();
         setAllProducts(data);
       } catch (error) {
-        console.log('Error al cargar productos:', error);
+        if (__DEV__) console.log('Error al cargar productos:', error);
       } finally {
         setLoading(false);
       }

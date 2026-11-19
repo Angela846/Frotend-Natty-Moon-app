@@ -61,6 +61,15 @@ const DetalleProducto = ({
     selectedVariant?.talla ?? tallas[0] ?? ''
   );
 
+  // El Drawer mantiene esta pantalla montada: si se abre otro producto, el estado
+  // (variante, talla y cantidad) se quedaba con los del producto anterior.
+  useEffect(() => {
+    const primera = product.variantes?.[0] ?? null;
+    setSelectedVariant(primera);
+    setTallaSeleccionada(primera?.talla ?? '');
+    setCantidad(1);
+  }, [product.id]);
+
   const coloresDeLaTalla = useMemo(
     () =>
       product.variantes.filter((v: ProductVariant) => v.talla === tallaSeleccionada),
@@ -98,7 +107,7 @@ const DetalleProducto = ({
       return;
     }
 
-    if (!selectedVariant) {
+    if (!selectedVariant || !product.variantes?.some((v: ProductVariant) => v.id === selectedVariant.id)) {
       Alert.alert('NatyMoon', 'Elige una talla y un color.');
       return;
     }

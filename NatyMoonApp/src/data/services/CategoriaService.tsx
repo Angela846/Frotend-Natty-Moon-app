@@ -8,9 +8,10 @@ export const CategoriaService = {
   },
 
   async crear(nombre: string, descripcion: string, imagen: string, token: string): Promise<Categoria> {
+    // [MOVIL] Modificado: se quitó "imagen" del body (ver nota arriba).
     return await apiFetch<Categoria>('/api/categorias', {
       method: 'POST',
-      body: { nombre, descripcion, imagen, activo: true },
+      body: { nombre, descripcion, activo: true },
       token,
     });
   },
@@ -22,9 +23,12 @@ export const CategoriaService = {
     imagen: string,
     token: string
   ): Promise<Categoria> {
+
+    const actual = await apiFetch<Record<string, any>>(`/api/categorias/${id}`);
+
     return await apiFetch<Categoria>(`/api/categorias/${id}`, {
       method: 'PUT',
-      body: { nombre, descripcion, imagen, activo: true },
+      body: { ...actual, nombre, descripcion },
       token,
     });
   },

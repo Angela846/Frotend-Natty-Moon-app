@@ -2,10 +2,15 @@ import { LoginResponse } from '../../Domain/entities/LoginResponse';
 import { AuthRepository } from '../../Domain/repositories/AuthRepository';
 import { apiFetch } from '../api/httpClient';
 
-// IMPORTANTE: el backend v4 espera "password" (no "contrasena") y, para
-// registrarse, "nombre" + "apellido" por separado. El registro público
-// SIEMPRE crea un usuario con rol USER (el backend lo fuerza así); crear
-// cuentas ADMIN/EMPLEADO se hace aparte, desde el panel de administración.
+
+type UsuarioResponse = Omit<LoginResponse, 'token'>;
+
+
+const aLoginResponse = (usuario: UsuarioResponse): LoginResponse => ({
+    ...usuario,
+    token: '',
+});
+
 export class AuthRepositoryImpl implements AuthRepository {
 
     async register(
@@ -16,12 +21,13 @@ export class AuthRepositoryImpl implements AuthRepository {
         telefono?: string
     ): Promise<LoginResponse> {
 
-        // El backend ya deja al usuario logueado (devuelve el token),
-        // así el registro y el login quedan en un solo paso.
-        return apiFetch<LoginResponse>('/api/auth/register', {
+       
+        const usuario = await apiFetch<UsuarioResponse>('/api/auth/register', {
             method: 'POST',
             body: { nombre, apellido, email, password, telefono },
         });
+
+        return aLoginResponse(usuario);
     }
 
     async login(
@@ -29,9 +35,23 @@ export class AuthRepositoryImpl implements AuthRepository {
         password: string
     ): Promise<LoginResponse> {
 
-        return apiFetch<LoginResponse>('/api/auth/login', {
+      
+        const usuario = await apiFetch<UsuarioResponse>('/api/auth/login', {
             method: 'POST',
             body: { email, password },
         });
+
+        return aLoginResponse(usuario);
+    }
+
+    
+    async me(): Promise<LoginResponse> {
+        const usuario = await apiFetch<UsuarioResponse>('/api/auth/me');
+        return aLoginResponse(usuario);
+    }
+
+   
+    async logout(): Promise<void> {
+        await apiFetch('/api/auth/logout', { method: 'POST' });
     }
 }

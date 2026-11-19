@@ -13,4 +13,10 @@ export interface AuthRepository {
         email: string,
         password: string
     ): Promise<LoginResponse>;
+
+    // Usuario de la sesión actual (según la cookie del backend)
+    me(): Promise<LoginResponse>;
+
+    // Cierra la sesión en el servidor (borra la cookie)
+    logout(): Promise<void>;
 }

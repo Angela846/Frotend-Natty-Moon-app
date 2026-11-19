@@ -54,7 +54,7 @@ const AdminHome = () => {
       }
 
     } catch (error) {
-      console.log('Error al cargar el dashboard:', error);
+      if (__DEV__) console.log('Error al cargar el dashboard:', error);
     } finally {
       setLoading(false);
     }

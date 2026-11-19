@@ -61,7 +61,7 @@ const GestionCupones = () => {
       const data = await CuponService.listarTodos(user.token);
       setCupones([...data].sort((a, b) => b.id - a.id));
     } catch (error) {
-      console.log('Error al cargar cupones:', error);
+      if (__DEV__) console.log('Error al cargar cupones:', error);
     } finally {
       setLoading(false);
     }

@@ -22,7 +22,7 @@ export const useCuponesViewModel = () => {
       const data = await CuponService.listarActivos(user.token);
       setCupones(data);
     } catch (error) {
-      console.log('Error al cargar cupones:', error);
+      if (__DEV__) console.log('Error al cargar cupones:', error);
     } finally {
       setLoading(false);
     }

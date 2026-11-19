@@ -45,7 +45,7 @@ const GestionCategorias = () => {
       const data = await CategoriaService.listar();
       setCategorias(data);
     } catch (error) {
-      console.log('Error al cargar categorías:', error);
+      if (__DEV__) console.log('Error al cargar categorías:', error);
     } finally {
       setLoading(false);
     }

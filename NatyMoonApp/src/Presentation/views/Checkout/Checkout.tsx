@@ -36,7 +36,7 @@ const Checkout = ({ route, navigation }: any) => {
     setCodigoCupon,
     confirming,
     confirmarCompra,
-  } = useCheckoutViewModel(subtotal);
+ } = useCheckoutViewModel(subtotal, shipping); // [MOVIL] Modificado: se pasa el costo de envío
 
   const handleConfirmar = () => {
     confirmarCompra(() => {

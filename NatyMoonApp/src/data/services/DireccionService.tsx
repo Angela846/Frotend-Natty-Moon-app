@@ -1,33 +1,48 @@
-import { apiFetch } from '../api/httpClient';
+import { apiFetch, obtenerIdUsuarioActual } from '../api/httpClient';
 import { DireccionInput, DireccionResponse } from '../../Domain/entities/Direccion';
+
 
 export const DireccionService = {
 
-  // GET /api/direcciones/mias
   async misDirecciones(token: string): Promise<DireccionResponse[]> {
-    return await apiFetch<DireccionResponse[]>('/api/direcciones/mias', { token });
+    
+    const [miId, todas] = await Promise.all([
+      obtenerIdUsuarioActual(),
+      apiFetch<DireccionResponse[]>('/api/direcciones-usuario', { token }),
+    ]);
+
+    return todas.filter((d) => d.usuario?.id === miId);
   },
 
-  // POST /api/direcciones
   async crear(input: DireccionInput, token: string): Promise<DireccionResponse> {
-    return await apiFetch<DireccionResponse>('/api/direcciones', {
+   
+    const miId = await obtenerIdUsuarioActual();
+
+    return await apiFetch<DireccionResponse>('/api/direcciones-usuario', {
       method: 'POST',
-      body: input,
+      body: {
+        ...input,
+        usuario: { id: miId },
+        pais: input.pais ?? 'Colombia',
+        esPrincipal: input.esPrincipal ?? false,
+      },
       token,
     });
   },
 
-  // PUT /api/direcciones/{id}
   async actualizar(id: number, input: DireccionInput, token: string): Promise<DireccionResponse> {
-    return await apiFetch<DireccionResponse>(`/api/direcciones/${id}`, {
+   
+    const actual = await apiFetch<Record<string, any>>(`/api/direcciones-usuario/${id}`, { token });
+
+    return await apiFetch<DireccionResponse>(`/api/direcciones-usuario/${id}`, {
       method: 'PUT',
-      body: input,
+      body: { ...actual, ...input },
       token,
     });
   },
 
-  // DELETE /api/direcciones/{id}
   async eliminar(id: number, token: string): Promise<void> {
-    await apiFetch<void>(`/api/direcciones/${id}`, { method: 'DELETE', token });
+    
+    await apiFetch<void>(`/api/direcciones-usuario/${id}`, { method: 'DELETE', token });
   },
 };

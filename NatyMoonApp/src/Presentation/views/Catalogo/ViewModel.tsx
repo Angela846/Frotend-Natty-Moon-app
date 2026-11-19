@@ -24,7 +24,7 @@ export const useCatalogoViewModel = () => {
       const data = await ProductoService.listar();
       setAllProducts(data);
     } catch (error) {
-      console.log('Error al cargar productos:', error);
+      if (__DEV__) console.log('Error al cargar productos:', error);
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ export const useCatalogoViewModel = () => {
       const data = await CategoriaService.listar();
       setCatalogos(data);
     } catch (error) {
-      console.log('Error al cargar catálogos:', error);
+      if (__DEV__) console.log('Error al cargar catálogos:', error);
     } finally {
       setLoading(false);
     }

@@ -7,27 +7,23 @@ import React, {
   ReactNode,
 } from 'react';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { LoginResponse } from '../../Domain/entities/LoginResponse';
 import { LoginAuthUseCase } from '../../Domain/UseCases/auth/LoginAuth';
 import { RegisterAuthUseCase } from '../../Domain/UseCases/auth/RegisterAuth';
 import { AuthRepositoryImpl } from '../../data/repositories/AuthRepositoryImpl';
 import { setUnauthorizedHandler } from '../../data/api/httpClient';
 
-const STORAGE_KEY = '@natymoon:auth_user';
 
-// Roles válidos que existen hoy en la tabla `rol` del backend.
 export type Rol = 'ADMIN' | 'EMPLEADO' | 'USER';
 
 type AuthContextType = {
   user: LoginResponse | null;
   isLoadingSession: boolean;
 
-  // true para ADMIN o EMPLEADO -> deben ver el panel de administración.
+ 
   isStaff: boolean;
 
-  // true solo para ADMIN -> ve secciones extra (ej. Gestión de Usuarios).
+  
   isAdmin: boolean;
 
   login: (email: string, password: string) => Promise<void>;
@@ -49,9 +45,6 @@ const loginUseCase = new LoginAuthUseCase(authRepository);
 const registerUseCase = new RegisterAuthUseCase(authRepository);
 
 
-// ==========================================
-// PROVIDER
-// ==========================================
 
 export const AuthProvider = ({
   children,
@@ -63,20 +56,14 @@ export const AuthProvider = ({
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
 
-  // ========================================
-  // RESTAURAR SESIÓN GUARDADA
-  // ========================================
-
+  
   useEffect(() => {
     (async () => {
       try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
-
-        if (stored) {
-          setUser(JSON.parse(stored));
-        }
-      } catch (error) {
-        console.log('Error al restaurar la sesión:', error);
+        const actual = await authRepository.me();
+        setUser(actual);
+      } catch {
+        setUser(null);
       } finally {
         setIsLoadingSession(false);
       }
@@ -84,25 +71,14 @@ export const AuthProvider = ({
   }, []);
 
 
-  // ========================================
-  // LOGIN
-  // ========================================
 
   const login = async (email: string, password: string) => {
     const result = await loginUseCase.execute(email, password);
-
     setUser(result);
-
-    await AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(result)
-    );
   };
 
 
-  // ========================================
-  // REGISTRO (deja logueado automáticamente)
-  // ========================================
+ 
 
   const register = async (
     nombre: string,
@@ -120,28 +96,21 @@ export const AuthProvider = ({
     );
 
     setUser(result);
-
-    await AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(result)
-    );
   };
 
 
-  // ========================================
-  // LOGOUT
-  // ========================================
-
+  
   const logout = useCallback(async () => {
+    try {
+      await authRepository.logout();
+    } catch (error) {
+      if (__DEV__) console.log('No se pudo cerrar la sesión en el servidor:', error);
+    }
     setUser(null);
-    await AsyncStorage.removeItem(STORAGE_KEY);
   }, []);
 
 
-  // Si cualquier request al backend responde 401 con una sesión que
-  // creíamos válida (token vencido, usuario eliminado, etc.), cerramos
-  // sesión automáticamente para que la persona vuelva al login en vez
-  // de quedarse viendo una pantalla rota.
+  
   useEffect(() => {
     setUnauthorizedHandler(() => {
       logout();
@@ -176,9 +145,7 @@ export const AuthProvider = ({
 };
 
 
-// ==========================================
-// HOOK
-// ==========================================
+
 
 export const useAuth = () => {
 

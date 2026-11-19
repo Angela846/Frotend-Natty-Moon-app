@@ -34,7 +34,6 @@ const ClienteNavigator = () => {
       <Drawer.Screen
         name="Catalogo"
         component={Catalogo}
-        options={{ unmountOnBlur: true }}
       />
 
       <Drawer.Screen

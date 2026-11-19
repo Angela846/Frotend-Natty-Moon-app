@@ -78,7 +78,7 @@ const GestionProductos = () => {
       setProductos(prods);
       setCategorias(cats);
     } catch (error) {
-      console.log('Error al cargar productos:', error);
+      if (__DEV__) console.log('Error al cargar productos:', error);
     } finally {
       setLoading(false);
     }
@@ -478,27 +478,7 @@ const GestionProductos = () => {
                 />
               )}
 
-              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-
-                <TouchableOpacity
-                  style={[adminStyles.secondaryButton, { flex: 1, flexDirection: 'row', justifyContent: 'center', gap: 6 }]}
-                  onPress={tomarFoto}
-                >
-                  <Ionicons name="camera-outline" size={18} color={ADMIN_COLORS.primary} />
-                  <Text style={adminStyles.secondaryButtonText}>Tomar foto</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[adminStyles.secondaryButton, { flex: 1, flexDirection: 'row', justifyContent: 'center', gap: 6 }]}
-                  onPress={elegirDeGaleria}
-                >
-                  <Ionicons name="images-outline" size={18} color={ADMIN_COLORS.primary} />
-                  <Text style={adminStyles.secondaryButtonText}>Galería</Text>
-                </TouchableOpacity>
-
-              </View>
-
-              <Text style={adminStyles.inputLabel}>...o pega una URL de imagen</Text>
+              <Text style={adminStyles.inputLabel}>URL de la imagen</Text>
               <TextInput
                 style={adminStyles.input}
                 value={form.urlImagen.startsWith('data:') ? '' : form.urlImagen}

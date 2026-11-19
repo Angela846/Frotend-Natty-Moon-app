@@ -40,8 +40,8 @@ const RegisterViewModel = () => {
       return false;
     }
 
-    if (password.length < 6) {
-      Alert.alert('NatyMoon', 'La contraseña debe tener mínimo 6 caracteres.');
+    if (password.length < 8) {
+      Alert.alert('NatyMoon', 'La contraseña debe tener mínimo 8 caracteres.');
       return false;
     }
 

@@ -23,7 +23,7 @@ const EMPTY_DIRECCION = {
   ciudad: '',
 };
 
-export const useCheckoutViewModel = (subtotal: number) => {
+export const useCheckoutViewModel = (subtotal: number, shipping: number = 0) => {
   const { user } = useAuth();
 
   const [direcciones, setDirecciones] = useState<DireccionResponse[]>([]);
@@ -54,7 +54,7 @@ export const useCheckoutViewModel = (subtotal: number) => {
         setShowForm(true);
       }
     } catch (error) {
-      console.log('Error al cargar direcciones:', error);
+      if (__DEV__) console.log('Error al cargar direcciones:', error);
     } finally {
       setLoading(false);
     }
@@ -131,6 +131,8 @@ export const useCheckoutViewModel = (subtotal: number) => {
           direccionId: selectedDireccionId,
           metodoPago,
           codigoCupon: codigoCupon.trim() || undefined,
+         
+          costoEnvio: shipping,
         },
         user.token
       );

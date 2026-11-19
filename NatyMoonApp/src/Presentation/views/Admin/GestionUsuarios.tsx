@@ -52,7 +52,7 @@ const GestionUsuarios = () => {
       const data = await UsuarioAdminService.listar(user.token);
       setUsuarios(data);
     } catch (error) {
-      console.log('Error al cargar usuarios:', error);
+      if (__DEV__) console.log('Error al cargar usuarios:', error);
     } finally {
       setLoading(false);
     }
@@ -140,8 +140,8 @@ const GestionUsuarios = () => {
       return;
     }
 
-    if (form.password.length < 6) {
-      Alert.alert('NatyMoon', 'La contraseña debe tener mínimo 6 caracteres.');
+    if (form.password.length < 8) {
+      Alert.alert('NatyMoon', 'La contraseña debe tener mínimo 8 caracteres.');
       return;
     }
 
@@ -361,7 +361,7 @@ const GestionUsuarios = () => {
                 style={adminStyles.input}
                 value={form.password}
                 onChangeText={(v) => setForm({ ...form, password: v })}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 secureTextEntry
               />
 

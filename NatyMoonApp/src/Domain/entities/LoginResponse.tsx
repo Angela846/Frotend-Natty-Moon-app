@@ -1,8 +1,13 @@
-// Coincide con el LoginResponse que devuelve el backend (AuthController).
-// El rol viene como texto simple: 'ADMIN' | 'EMPLEADO' | 'USER'
+
 export interface LoginResponse {
     id: number;
-    token: string;
+    nombre: string;
+    apellido: string;
     email: string;
+    telefono: string | null;
     rol: string;
+    activo: boolean;
+ 
+   
+    token: string;
 }

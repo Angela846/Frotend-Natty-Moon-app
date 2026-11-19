@@ -82,7 +82,7 @@ const GestionPedidos = () => {
       const data = await OrdenAdminService.verTodasLasOrdenes(user.token);
       setOrdenes([...data].sort((a, b) => b.id - a.id));
     } catch (error) {
-      console.log('Error al cargar pedidos:', error);
+      if (__DEV__) console.log('Error al cargar pedidos:', error);
     } finally {
       setLoading(false);
     }

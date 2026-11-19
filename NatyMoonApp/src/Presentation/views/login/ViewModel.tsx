@@ -4,7 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAuth } from '../../context/AuthContext';
 
-const REMEMBER_KEY = '@natymoon:remembered_credentials';
+// Solo se recuerda el correo. La contraseña nunca se guarda en el teléfono:
+// la sesión se mantiene con la cookie del backend.
+const REMEMBER_KEY = '@natymoon:remembered_email';
+// Clave de versiones anteriores, que guardaba también la contraseña.
+const OLD_CREDENTIALS_KEY = '@natymoon:remembered_credentials';
 
 const LoginViewModel = () => {
     const [email, setEmail] = useState('');
@@ -16,21 +20,19 @@ const LoginViewModel = () => {
     const { login } = useAuth();
 
     // Al abrir la pantalla de login (por ejemplo, justo después de cerrar
-    // sesión), si había credenciales guardadas las precargamos en los
-    // campos por comodidad, PERO el checkbox "Recordarme" siempre arranca
-    // desmarcado: que haya datos guardados de una vez anterior no debe
-    // hacer que se sigan guardando solos si el usuario no lo pide de nuevo.
+    // sesión), si había un correo guardado lo precargamos por comodidad, PERO
+    // el checkbox "Recordarme" siempre arranca desmarcado.
     useEffect(() => {
         (async () => {
             try {
-                const stored = await AsyncStorage.getItem(REMEMBER_KEY);
-                if (stored) {
-                    const { email: savedEmail, password: savedPassword } = JSON.parse(stored);
-                    setEmail(savedEmail ?? '');
-                    setPassword(savedPassword ?? '');
+                // Borra las contraseñas que guardaron versiones anteriores.
+                await AsyncStorage.removeItem(OLD_CREDENTIALS_KEY);
+                const savedEmail = await AsyncStorage.getItem(REMEMBER_KEY);
+                if (savedEmail) {
+                    setEmail(savedEmail);
                 }
             } catch (error) {
-                console.log('Error al leer credenciales guardadas:', error);
+                if (__DEV__) console.log('Error al leer el correo guardado:', error);
             }
         })();
     }, []);
@@ -51,14 +53,10 @@ const LoginViewModel = () => {
         try {
             await login(email, password);
 
-            // Guardamos (o borramos) las credenciales según el checkbox
-            // "Recordarme". Esto vive aparte de la sesión: aunque el
-            // usuario cierre sesión, el login la sigue recordando.
+            // Guardamos (o borramos) solo el correo según el checkbox
+            // "Recordarme". La contraseña no se guarda nunca.
             if (remember) {
-                await AsyncStorage.setItem(
-                    REMEMBER_KEY,
-                    JSON.stringify({ email, password })
-                );
+                await AsyncStorage.setItem(REMEMBER_KEY, email);
             } else {
                 await AsyncStorage.removeItem(REMEMBER_KEY);
             }

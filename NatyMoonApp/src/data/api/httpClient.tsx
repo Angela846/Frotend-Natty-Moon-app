@@ -5,6 +5,7 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 type FetchOptions = {
   method?: Method;
   body?: any;
+  
   token?: string;
   query?: Record<string, string | number>;
 };
@@ -36,13 +37,10 @@ export async function apiFetch<T>(
     url += `?${params}`;
   }
 
+  
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
 
   let response: Response;
 
@@ -51,6 +49,8 @@ export async function apiFetch<T>(
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      
+      credentials: 'include',
     });
   } catch {
     throw new Error('No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.');
@@ -61,19 +61,46 @@ export async function apiFetch<T>(
 
   if (!response.ok) {
     const message =
-      (data && (data.mensaje || data.error || data.message)) ||
-      raw ||
-      'Ocurrió un error al comunicarse con el servidor';
+      response.status >= 500
+        ? 'Ocurrió un error en el servidor. Inténtalo de nuevo más tarde.'
+        : (data && (data.mensaje || data.error || data.message)) ||
+          raw ||
+          'Ocurrió un error al comunicarse con el servidor';
 
-
-    if (response.status === 401 && token) {
+    
+    if (response.status === 401 && token !== undefined) {
       onUnauthorized?.();
+    }
+
+    // Spring responde 403 (no 401) cuando falta la cookie o ya venció.
+    // Un 403 también puede ser un permiso real denegado, así que solo se
+    // cierra la sesión si /api/auth/me confirma que ya no hay sesión.
+    if (response.status === 403 && token !== undefined && path !== '/api/auth/me') {
+      if (!(await sesionVigente())) {
+        onUnauthorized?.();
+      }
     }
 
     throw new Error(message);
   }
 
   return data as T;
+}
+
+
+async function sesionVigente(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
+    return res.ok;
+  } catch {
+    // Sin conexión: no se cierra la sesión por esto.
+    return true;
+  }
+}
+
+export async function obtenerIdUsuarioActual(): Promise<number> {
+  const usuario = await apiFetch<{ id: number }>('/api/auth/me', { token: '' });
+  return usuario.id;
 }
 
 const safeParse = (raw: string) => {

@@ -51,7 +51,7 @@ export const useHomeViewModel = () => {
         }))
       );
     } catch (error) {
-      console.log('Error al cargar categorías:', error);
+      if (__DEV__) console.log('Error al cargar categorías:', error);
     } finally {
       setLoadingCategories(false);
     }

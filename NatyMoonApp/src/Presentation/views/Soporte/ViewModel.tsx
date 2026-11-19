@@ -28,7 +28,7 @@ export const useSoporteViewModel = () => {
       const data = await NovedadService.misNovedades(user.token);
       setNovedades([...data].sort((a, b) => b.id - a.id));
     } catch (error) {
-      console.log('Error al cargar reportes:', error);
+      if (__DEV__) console.log('Error al cargar reportes:', error);
     } finally {
       setLoading(false);
     }
