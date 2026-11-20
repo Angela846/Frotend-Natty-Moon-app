@@ -17,27 +17,60 @@ export function setUnauthorizedHandler(handler: (() => void) | null) {
   onUnauthorized = handler;
 }
 
+function construirUrl(path: string, query?: Record<string, string | number>): string {
+  const base = `${API_URL}${path}`;
+  if (!query) {
+    return base;
+  }
+
+  const params = new URLSearchParams(
+    Object.entries(query).reduce((acc, [key, value]) => {
+      acc[key] = String(value);
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+
+  return `${base}?${params}`;
+}
+
+function mensajeDeError(status: number, data: any, raw: string): string {
+  // Los errores 5xx no muestran detalles internos del servidor.
+  if (status >= 500) {
+    return 'Ocurrió un error en el servidor. Inténtalo de nuevo más tarde.';
+  }
+  return (
+    (data && (data.mensaje || data.error || data.message)) ||
+    raw ||
+    'Ocurrió un error al comunicarse con el servidor'
+  );
+}
+
+// Spring responde 403 (no 401) cuando falta la cookie o ya venció. Un 403
+// también puede ser un permiso real denegado, así que solo se cierra la sesión
+// si /api/auth/me confirma que ya no hay sesión.
+async function manejarSesionVencida(status: number, path: string, token?: string): Promise<void> {
+  if (token === undefined) {
+    return;
+  }
+
+  if (status === 401) {
+    onUnauthorized?.();
+    return;
+  }
+
+  if (status === 403 && path !== '/api/auth/me' && !(await sesionVigente())) {
+    onUnauthorized?.();
+  }
+}
+
 export async function apiFetch<T>(
   path: string,
   options: FetchOptions = {}
 ): Promise<T> {
-
   const { method = 'GET', body, token, query } = options;
 
-  let url = `${API_URL}${path}`;
+  const url = construirUrl(path, query);
 
-  if (query) {
-    const params = new URLSearchParams(
-      Object.entries(query).reduce((acc, [key, value]) => {
-        acc[key] = String(value);
-        return acc;
-      }, {} as Record<string, string>)
-    ).toString();
-
-    url += `?${params}`;
-  }
-
-  
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -49,7 +82,6 @@ export async function apiFetch<T>(
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
-      
       credentials: 'include',
     });
   } catch {
@@ -60,28 +92,8 @@ export async function apiFetch<T>(
   const data = raw ? safeParse(raw) : null;
 
   if (!response.ok) {
-    const message =
-      response.status >= 500
-        ? 'Ocurrió un error en el servidor. Inténtalo de nuevo más tarde.'
-        : (data && (data.mensaje || data.error || data.message)) ||
-          raw ||
-          'Ocurrió un error al comunicarse con el servidor';
-
-    
-    if (response.status === 401 && token !== undefined) {
-      onUnauthorized?.();
-    }
-
-    // Spring responde 403 (no 401) cuando falta la cookie o ya venció.
-    // Un 403 también puede ser un permiso real denegado, así que solo se
-    // cierra la sesión si /api/auth/me confirma que ya no hay sesión.
-    if (response.status === 403 && token !== undefined && path !== '/api/auth/me') {
-      if (!(await sesionVigente())) {
-        onUnauthorized?.();
-      }
-    }
-
-    throw new Error(message);
+    await manejarSesionVencida(response.status, path, token);
+    throw new Error(mensajeDeError(response.status, data, raw));
   }
 
   return data as T;

@@ -1,4 +1,3 @@
-oService · TSX
 import { apiFetch, obtenerIdUsuarioActual } from '../api/httpClient';
 import {
   Carrito,
