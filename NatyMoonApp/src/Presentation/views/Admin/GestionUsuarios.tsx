@@ -60,7 +60,7 @@ const GestionUsuarios = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

@@ -63,7 +63,7 @@ const Reportes = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

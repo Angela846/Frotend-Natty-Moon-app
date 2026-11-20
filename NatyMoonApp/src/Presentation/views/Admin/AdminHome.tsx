@@ -62,7 +62,7 @@ const AdminHome = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

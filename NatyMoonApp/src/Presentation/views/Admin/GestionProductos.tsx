@@ -86,7 +86,7 @@ const GestionProductos = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

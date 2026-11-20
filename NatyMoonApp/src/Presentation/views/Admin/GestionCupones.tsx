@@ -69,7 +69,7 @@ const GestionCupones = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

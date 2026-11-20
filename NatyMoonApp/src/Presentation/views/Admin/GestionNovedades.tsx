@@ -77,7 +77,7 @@ const GestionNovedades = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

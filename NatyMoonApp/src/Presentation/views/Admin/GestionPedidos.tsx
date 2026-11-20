@@ -90,7 +90,7 @@ const GestionPedidos = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 
