@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-blush text-plum-ink font-body antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display text-plum-ink;
+  }
+  ::selection {
+    @apply bg-rose/30;
+  }
+  :focus-visible {
+    outline: 2px solid #5B3758;
+    outline-offset: 2px;
+  }
+
+  /* El texto que el usuario escribe en cualquier campo siempre se ve oscuro,
+     sin importar el color de texto que tenga heredado el contenedor donde
+     esté (ej. paneles con fondo oscuro). Así nunca queda invisible. */
+  input,
+  textarea,
+  select {
+    color: #241826;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(36, 24, 38, 0.4);
+  }
+}
+
+@layer utilities {
+  .container-natymoo {
+    @apply max-w-6xl mx-auto px-5 sm:px-8;
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
