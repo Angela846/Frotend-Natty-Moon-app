@@ -58,7 +58,7 @@ export const AuthProvider = ({
 
   
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const actual = await authRepository.me();
         setUser(actual);
@@ -113,7 +113,7 @@ export const AuthProvider = ({
   
   useEffect(() => {
     setUnauthorizedHandler(() => {
-      logout();
+      void logout();
     });
 
     return () => setUnauthorizedHandler(null);
