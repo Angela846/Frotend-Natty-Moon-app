@@ -45,9 +45,9 @@ export const useCatalogoViewModel = () => {
   useFocusEffect(
     useCallback(() => {
       if (categoryId || categoryName) {
-        loadProducts();
+        void loadProducts();
       } else {
-        loadCatalogos();
+        void loadCatalogos();
       }
     }, [categoryId, categoryName, loadProducts, loadCatalogos])
   );

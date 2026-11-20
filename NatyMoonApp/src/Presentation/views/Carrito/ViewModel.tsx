@@ -39,7 +39,7 @@ export const useCarritoViewModel = () => {
 
   useFocusEffect(
     useCallback(() => {
-      loadCarrito();
+      void loadCarrito();
     }, [loadCarrito])
   );
 

@@ -19,7 +19,7 @@ export const useBuscarViewModel = () => {
   // ==========================================
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const data = await ProductoService.listar();
         setAllProducts(data);

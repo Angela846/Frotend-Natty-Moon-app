@@ -80,8 +80,8 @@ export const useHomeViewModel = () => {
 
   useFocusEffect(
     useCallback(() => {
-      loadCategories();
-      loadCartCount();
+      void loadCategories();
+      void loadCartCount();
     }, [loadCategories, loadCartCount])
   );
 

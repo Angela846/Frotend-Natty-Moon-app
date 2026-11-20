@@ -23,7 +23,7 @@ const LoginViewModel = () => {
     // sesión), si había un correo guardado lo precargamos por comodidad, PERO
     // el checkbox "Recordarme" siempre arranca desmarcado.
     useEffect(() => {
-        (async () => {
+        void (async () => {
             try {
                 // Borra las contraseñas que guardaron versiones anteriores.
                 await AsyncStorage.removeItem(OLD_CREDENTIALS_KEY);

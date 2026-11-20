@@ -49,7 +49,7 @@ const DetalleProducto = ({
   };
 
   useEffect(() => {
-    loadCartCount();
+    void loadCartCount();
   }, [user]);
 
   const tallas = useMemo(
@@ -122,7 +122,7 @@ const DetalleProducto = ({
     try {
       await CarritoService.agregar(selectedVariant.id, cantidad, user.token);
 
-      loadCartCount();
+      void loadCartCount();
 
       Alert.alert(
         'Producto agregado',

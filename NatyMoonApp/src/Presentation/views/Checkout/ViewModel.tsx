@@ -62,7 +62,7 @@ export const useCheckoutViewModel = (subtotal: number, shipping: number = 0) => 
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 

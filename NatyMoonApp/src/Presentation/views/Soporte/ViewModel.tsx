@@ -36,7 +36,7 @@ export const useSoporteViewModel = () => {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      void load();
     }, [load])
   );
 
