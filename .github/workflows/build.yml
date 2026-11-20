@@ -18,11 +18,13 @@ jobs:
       id-token: write
 
     steps:
+      # 1. Descargar el código del repositorio
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Preparar Node.js para el proyecto
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,14 +32,17 @@ jobs:
           cache: npm
           cache-dependency-path: NatyMoonApp/package-lock.json
 
+      # 3. Instalar las dependencias de la aplicación
       - name: Install dependencies
-        run: npm ci
         working-directory: NatyMoonApp
+        run: npm ci
 
+      # 4. Autenticarse con SonarQube
       - name: Authenticate with SonarQube
         uses: SonarSource/sonarqube-auth-action@v1
         id: auth
 
+      # 5. Analizar el código con SonarQube
       - name: Run SonarQube analysis
         uses: SonarSource/sonarqube-scan-action@v8
         with:
@@ -45,4 +50,3 @@ jobs:
           args: >
             -Dsonar.organization=${{ steps.auth.outputs.organization }}
             -Dsonar.projectKey=${{ steps.auth.outputs.project-key }}
-
