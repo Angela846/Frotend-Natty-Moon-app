@@ -133,11 +133,13 @@ export const CarritoService = {
   async vaciar(token: string): Promise<void> {
     const carrito = await obtenerCarritoActivo(token, false);
     if (!carrito) return;
- 
+
     const detalles = await detallesDelCarrito(carrito.id, token);
- 
-    for (const detalle of detalles) {
-      await apiFetch(`/api/detalle-carrito/${detalle.id}`, { method: 'DELETE', token });
-    }
+
+    await Promise.all(
+      detalles.map((detalle) =>
+        apiFetch(`/api/detalle-carrito/${detalle.id}`, { method: 'DELETE', token })
+      )
+    );
   },
 };
