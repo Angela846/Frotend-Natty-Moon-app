@@ -14,7 +14,11 @@ export default function AdminCategories() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    categoriasApi.list().then(setCategorias).finally(() => setCargando(false));
+    categoriasApi
+      .list()
+      .then(setCategorias)
+      .catch(() => setError("No pudimos cargar las categorías."))
+      .finally(() => setCargando(false));
   }, []);
 
   async function handleSubmit(e) {
@@ -64,8 +68,8 @@ export default function AdminCategories() {
     <div>
       <form onSubmit={handleSubmit} className="border border-plum/10 rounded-2xl p-6 bg-white/40 mb-8 flex gap-3 items-end flex-wrap">
         <div className="flex-1 min-w-[160px]">
-          <label className="block text-sm font-medium mb-1">Nombre</label>
-          <input
+          <label htmlFor="cat-nombre" className="block text-sm font-medium mb-1">Nombre</label>
+          <input id="cat-nombre"
             value={form.nombre}
             onChange={(e) => setForm({ ...form, nombre: soloLetras(e.target.value) })}
             className="w-full px-3 py-2 rounded-lg border border-plum/20 bg-white/60"
@@ -73,8 +77,8 @@ export default function AdminCategories() {
           <FieldError mensaje={erroresForm.nombre} />
         </div>
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium mb-1">Descripción</label>
-          <input
+          <label htmlFor="cat-descripcion" className="block text-sm font-medium mb-1">Descripción</label>
+          <input id="cat-descripcion"
             value={form.descripcion}
             onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
             className="w-full px-3 py-2 rounded-lg border border-plum/20 bg-white/60"

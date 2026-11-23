@@ -46,8 +46,8 @@ export default function Login() {
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
-          <label className="block text-sm font-medium mb-1">Correo electrónico</label>
-          <input
+          <label htmlFor="login-email" className="block text-sm font-medium mb-1">Correo electrónico</label>
+          <input id="login-email"
             type="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -56,8 +56,8 @@ export default function Login() {
           <FieldError mensaje={errores.email} />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Contraseña</label>
-          <input
+          <label htmlFor="login-password" className="block text-sm font-medium mb-1">Contraseña</label>
+          <input id="login-password"
             type="password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}

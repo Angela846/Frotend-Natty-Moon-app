@@ -35,6 +35,7 @@ export default function ReportarNovedad() {
         );
         setMisOrdenes(o.filter((x) => x.usuario?.id === usuario.id));
       })
+      .catch(() => setError("No pudimos cargar tus novedades."))
       .finally(() => setCargando(false));
   }, [usuario.id]);
 
@@ -83,8 +84,8 @@ export default function ReportarNovedad() {
 
       <form onSubmit={handleSubmit} className="border border-plum/10 rounded-2xl p-6 bg-white/40 mb-10">
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Asunto</label>
-          <input
+          <label htmlFor="novedad-asunto" className="block text-sm font-medium mb-1">Asunto</label>
+          <input id="novedad-asunto"
             value={form.asunto}
             onChange={(e) => setForm({ ...form, asunto: e.target.value })}
             placeholder="Ej: Llegó una talla equivocada"
@@ -94,8 +95,8 @@ export default function ReportarNovedad() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">¿Es sobre algún pedido? (opcional)</label>
-          <select
+          <label htmlFor="novedad-orden" className="block text-sm font-medium mb-1">¿Es sobre algún pedido? (opcional)</label>
+          <select id="novedad-orden"
             value={form.ordenId}
             onChange={(e) => setForm({ ...form, ordenId: e.target.value })}
             className="w-full px-4 py-2.5 rounded-xl border border-plum/20 bg-white/60"
@@ -110,8 +111,8 @@ export default function ReportarNovedad() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Cuéntanos qué pasó</label>
-          <textarea
+          <label htmlFor="novedad-descripcion" className="block text-sm font-medium mb-1">Cuéntanos qué pasó</label>
+          <textarea id="novedad-descripcion"
             rows={4}
             value={form.descripcion}
             onChange={(e) => setForm({ ...form, descripcion: e.target.value })}

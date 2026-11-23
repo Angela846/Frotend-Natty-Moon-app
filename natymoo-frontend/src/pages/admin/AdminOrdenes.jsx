@@ -50,11 +50,12 @@ export default function AdminOrdenes() {
         setDetalles(detallesPorOrden);
         setHistoriales(historialPorOrden);
       })
+      .catch(() => setError("No pudimos cargar los pedidos."))
       .finally(() => setCargando(false));
   }
 
   useEffect(() => {
-    cargarTodo();
+    void cargarTodo();
   }, []);
 
   async function handleCambiarEstado(orden, nuevoEstado) {

@@ -17,6 +17,7 @@ export default function AdminUsuarios() {
         setUsuarios(u);
         setRoles(r);
       })
+      .catch(() => setError("No pudimos cargar los usuarios."))
       .finally(() => setCargando(false));
   }, []);
 

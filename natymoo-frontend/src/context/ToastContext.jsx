@@ -79,10 +79,11 @@ export function ToastProvider({ children }) {
 
       <div className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 items-end pointer-events-none">
         {toasts.map((t) => (
-          <div
+          <button
+            type="button"
             key={t.id}
             onClick={() => cerrarToast(t.id)}
-            className={`pointer-events-auto cursor-pointer max-w-xs px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 animate-[toast-in_0.2s_ease-out] ${
+            className={`pointer-events-auto cursor-pointer text-left max-w-xs px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 animate-[toast-in_0.2s_ease-out] ${
               t.tipo === "error"
                 ? "bg-rose text-white"
                 : t.tipo === "info"
@@ -92,7 +93,7 @@ export function ToastProvider({ children }) {
           >
             <span>{t.tipo === "error" ? "✕" : t.tipo === "info" ? "ℹ" : "✓"}</span>
             {t.mensaje}
-          </div>
+          </button>
         ))}
       </div>
     </ToastContext.Provider>

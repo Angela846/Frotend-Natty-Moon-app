@@ -10,7 +10,11 @@ export default function AdminRoles() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    rolesApi.list().then(setRoles).finally(() => setCargando(false));
+    rolesApi
+      .list()
+      .then(setRoles)
+      .catch(() => setError("No pudimos cargar los roles."))
+      .finally(() => setCargando(false));
   }, []);
 
   async function handleCrear(e) {
@@ -41,8 +45,8 @@ export default function AdminRoles() {
     <div>
       <form onSubmit={handleCrear} className="border border-plum/10 rounded-2xl p-6 bg-white/40 mb-8 flex gap-3 items-end">
         <div className="flex-1">
-          <label className="block text-sm font-medium mb-1">Nombre del rol</label>
-          <input
+          <label htmlFor="rol-nombre" className="block text-sm font-medium mb-1">Nombre del rol</label>
+          <input id="rol-nombre"
             required
             placeholder="Ej: EMPLEADO"
             value={nombre}

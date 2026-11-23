@@ -69,8 +69,8 @@ export default function Register() {
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Nombre</label>
-            <input
+            <label htmlFor="reg-nombre" className="block text-sm font-medium mb-1">Nombre</label>
+            <input id="reg-nombre"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: soloLetras(e.target.value) })}
               className="w-full px-4 py-3 rounded-xl border border-plum/20 bg-white/60 focus:border-plum outline-none"
@@ -78,8 +78,8 @@ export default function Register() {
             <FieldError mensaje={errores.nombre} />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Apellido</label>
-            <input
+            <label htmlFor="reg-apellido" className="block text-sm font-medium mb-1">Apellido</label>
+            <input id="reg-apellido"
               value={form.apellido}
               onChange={(e) => setForm({ ...form, apellido: soloLetras(e.target.value) })}
               className="w-full px-4 py-3 rounded-xl border border-plum/20 bg-white/60 focus:border-plum outline-none"
@@ -89,8 +89,8 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Correo electrónico</label>
-          <input
+          <label htmlFor="reg-email" className="block text-sm font-medium mb-1">Correo electrónico</label>
+          <input id="reg-email"
             type="email"
             value={form.email}
             onChange={set("email")}
@@ -100,8 +100,8 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Teléfono</label>
-          <input
+          <label htmlFor="reg-telefono" className="block text-sm font-medium mb-1">Teléfono</label>
+          <input id="reg-telefono"
             inputMode="numeric"
             value={form.telefono}
             onChange={(e) => setForm({ ...form, telefono: soloNumeros(e.target.value) })}
@@ -111,8 +111,8 @@ export default function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Contraseña</label>
-          <input
+          <label htmlFor="reg-password" className="block text-sm font-medium mb-1">Contraseña</label>
+          <input id="reg-password"
             type="password"
             value={form.password}
             onChange={set("password")}

@@ -48,6 +48,7 @@ export default function Home() {
           variantes: vars,
         });
       })
+      .catch((err) => console.error("No se pudo cargar el catálogo:", err))
       .finally(() => setCargando(false));
   }, []);
 

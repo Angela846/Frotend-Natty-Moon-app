@@ -16,13 +16,14 @@ export default function EmpleadoStock() {
         setVariantes(v);
         setProductos(p);
       })
+      .catch(() => setError("No pudimos cargar el inventario."))
       .finally(() => setCargando(false));
   }, []);
 
   async function handleActualizarStock(variante, nuevoStock) {
     setError("");
     const stock = Number(nuevoStock);
-    if (isNaN(stock) || stock < 0) {
+    if (Number.isNaN(stock) || stock < 0) {
       setError("El stock debe ser un número mayor o igual a cero.");
       return;
     }

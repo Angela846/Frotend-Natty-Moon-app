@@ -28,6 +28,7 @@ export default function AdminPagos() {
         setPagos(p);
         setOrdenes(o);
       })
+      .catch(() => setError("No pudimos cargar los pagos."))
       .finally(() => setCargando(false));
   }, []);
 

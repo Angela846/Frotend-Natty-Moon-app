@@ -9,7 +9,7 @@ export function requerido(valor, etiqueta = "Este campo") {
 
 export function esEmailValido(valor) {
   if (!valor) return "El correo es obligatorio.";
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const regex = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
   if (!regex.test(valor)) return "Ingresa un correo electrónico válido.";
   return null;
 }
@@ -23,7 +23,7 @@ export function longitudMinima(valor, min, etiqueta = "Este campo") {
 
 export function numeroPositivo(valor, etiqueta = "Este valor") {
   const n = Number(valor);
-  if (valor === "" || valor === null || valor === undefined || isNaN(n)) {
+  if (valor === "" || valor === null || valor === undefined || Number.isNaN(n)) {
     return `${etiqueta} debe ser un número.`;
   }
   if (n <= 0) return `${etiqueta} debe ser mayor a cero.`;
@@ -32,7 +32,7 @@ export function numeroPositivo(valor, etiqueta = "Este valor") {
 
 export function numeroNoNegativo(valor, etiqueta = "Este valor") {
   const n = Number(valor);
-  if (valor === "" || valor === null || valor === undefined || isNaN(n)) {
+  if (valor === "" || valor === null || valor === undefined || Number.isNaN(n)) {
     return `${etiqueta} debe ser un número.`;
   }
   if (n < 0) return `${etiqueta} no puede ser negativo.`;

@@ -54,7 +54,11 @@ export default function AdminCupones() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    cuponesApi.list().then(setCupones).finally(() => setCargando(false));
+    cuponesApi
+      .list()
+      .then(setCupones)
+      .catch(() => setError("No pudimos cargar los cupones."))
+      .finally(() => setCargando(false));
   }, []);
 
   async function handleSubmit(e) {
@@ -143,8 +147,8 @@ export default function AdminCupones() {
             <FieldError mensaje={erroresForm.valor} />
           </div>
           <div>
-            <label className="block text-xs text-plum-ink/50 mb-1">Fecha inicio</label>
-            <input
+            <label htmlFor="cupon-inicio" className="block text-xs text-plum-ink/50 mb-1">Fecha inicio</label>
+            <input id="cupon-inicio"
               type="datetime-local"
               value={form.fechaInicio}
               onChange={(e) => setForm({ ...form, fechaInicio: e.target.value })}
@@ -152,8 +156,8 @@ export default function AdminCupones() {
             />
           </div>
           <div>
-            <label className="block text-xs text-plum-ink/50 mb-1">Fecha fin</label>
-            <input
+            <label htmlFor="cupon-fin" className="block text-xs text-plum-ink/50 mb-1">Fecha fin</label>
+            <input id="cupon-fin"
               type="datetime-local"
               value={form.fechaFin}
               onChange={(e) => setForm({ ...form, fechaFin: e.target.value })}

@@ -22,6 +22,7 @@ export default function Account() {
     direccionesApi
       .list()
       .then((todas) => setDirecciones(todas.filter((d) => d.usuario?.id === usuario.id)))
+      .catch(() => setError("No pudimos cargar tus direcciones."))
       .finally(() => setCargando(false));
   }, [usuario.id]);
 

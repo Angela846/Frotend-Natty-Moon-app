@@ -35,7 +35,7 @@ export default function LowStockAlert() {
           `: ${resumen}${extra}.`,
         "error"
       );
-    });
+    }).catch((err) => console.error("No se pudo revisar el stock bajo:", err));
   }, [registrarNotificacion]);
 
   return null;

@@ -64,6 +64,7 @@ export default function Checkout() {
         if (principal) setDireccionId(principal.id);
         else setMostrarForm(true);
       })
+      .catch(() => setError("No pudimos cargar tus direcciones."))
       .finally(() => setCargando(false));
   }, [usuario.id]);
 
@@ -364,10 +365,10 @@ export default function Checkout() {
         <PagoQr metodo={metodoPago} monto={totalFinal} />
 
         <div className="mt-4">
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="checkout-referencia" className="block text-sm font-medium mb-1">
             Número de referencia de tu pago (opcional)
           </label>
-          <input
+          <input id="checkout-referencia"
             placeholder="Ej: M12345678"
             value={referenciaPago}
             onChange={(e) => setReferenciaPago(e.target.value)}

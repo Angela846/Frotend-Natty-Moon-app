@@ -62,7 +62,7 @@ export default function AdminProducts() {
   }
 
   useEffect(() => {
-    cargarTodo();
+    void cargarTodo();
   }, []);
 
   function resetForm() {

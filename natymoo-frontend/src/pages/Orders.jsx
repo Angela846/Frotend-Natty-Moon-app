@@ -77,6 +77,7 @@ export default function Orders() {
         setHistoriales(historialPorOrden);
         setPagos(pagoPorOrden);
       })
+      .catch((err) => console.error("No se pudieron cargar los pedidos:", err))
       .finally(() => setCargando(false));
   }, [usuario.id]);
 

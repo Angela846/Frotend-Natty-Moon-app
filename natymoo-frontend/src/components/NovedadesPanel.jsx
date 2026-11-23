@@ -30,6 +30,7 @@ export default function NovedadesPanel() {
       .then((data) =>
         setNovedades(data.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion)))
       )
+      .catch(() => setError("No pudimos cargar las novedades."))
       .finally(() => setCargando(false));
   }, []);
 
@@ -116,10 +117,10 @@ export default function NovedadesPanel() {
               <p className="text-sm text-plum-ink/70 mt-3">{n.descripcion}</p>
 
               <div className="mt-4 border-t border-plum/10 pt-4">
-                <label className="block text-xs font-medium text-plum-ink/60 mb-1">
+                <label htmlFor={`respuesta-${n.id}`} className="block text-xs font-medium text-plum-ink/60 mb-1">
                   Respuesta interna
                 </label>
-                <textarea
+                <textarea id={`respuesta-${n.id}`}
                   rows={2}
                   defaultValue={n.respuesta || ""}
                   onChange={(e) =>

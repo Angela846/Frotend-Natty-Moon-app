@@ -16,6 +16,7 @@ export default function AdminDirecciones() {
         setDirecciones(d);
         setUsuarios(u);
       })
+      .catch(() => setError("No pudimos cargar las direcciones."))
       .finally(() => setCargando(false));
   }, []);
 
