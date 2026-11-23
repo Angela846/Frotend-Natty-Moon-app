@@ -1,20 +1,17 @@
 
-name: SonarQube Analysis
+name: SonarQube Analysis - NatyMoon Web y Movil
 
 on:
   push:
     branches:
       - main
+
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-
-  # ====================================
-  # ANALISIS DE LA APLICACION MOVIL
-  # ====================================
-  sonarqube-mobile:
-    name: SonarQube - Aplicacion Movil
+  sonarqube:
+    name: Analisis SonarQube Web y Movil
     runs-on: ubuntu-latest
 
     permissions:
@@ -22,70 +19,52 @@ jobs:
       id-token: write
 
     steps:
+      # ========================================
+      # 1. DESCARGAR REPOSITORIO
+      # ========================================
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ========================================
+      # 2. CONFIGURAR NODE.JS
+      # ========================================
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: NatyMoonApp/package-lock.json
 
-      - name: Install mobile dependencies
+      # ========================================
+      # 3. INSTALAR DEPENDENCIAS APP MOVIL
+      # ========================================
+      - name: Install Mobile Dependencies
         working-directory: NatyMoonApp
         run: npm ci
 
-      - name: Authenticate with SonarQube
-        uses: SonarSource/sonarqube-auth-action@v1
-        id: auth
-
-      - name: Analyze mobile application
-        uses: SonarSource/sonarqube-scan-action@v8
-        with:
-          projectBaseDir: NatyMoonApp
-          args: >
-            -Dsonar.organization=${{ steps.auth.outputs.organization }}
-            -Dsonar.projectKey=${{ steps.auth.outputs.project-key }}
-
-  # ====================================
-  # ANALISIS DE LA APLICACION WEB
-  # ====================================
-  sonarqube-web:
-    name: SonarQube - Aplicacion Web
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: natymoo-frontend/package-lock.json
-
-      - name: Install web dependencies
+      # ========================================
+      # 4. INSTALAR DEPENDENCIAS WEB
+      # ========================================
+      - name: Install Web Dependencies
         working-directory: natymoo-frontend
         run: npm ci
 
+      # ========================================
+      # 5. AUTENTICACION SONARQUBE
+      # ========================================
       - name: Authenticate with SonarQube
         uses: SonarSource/sonarqube-auth-action@v1
         id: auth
 
-      - name: Analyze web application
+      # ========================================
+      # 6. ANALIZAR WEB Y APP EN UN SOLO PROYECTO
+      # ========================================
+      - name: Analyze NatyMoon Web and Mobile
         uses: SonarSource/sonarqube-scan-action@v8
         with:
-          projectBaseDir: natymoo-frontend
           args: >
             -Dsonar.organization=${{ steps.auth.outputs.organization }}
-            -Dsonar.projectKey=${{ vars.SONAR_WEB_PROJECT_KEY }}
+            -Dsonar.projectKey=${{ steps.auth.outputs.project-key }}
+            -Dsonar.sources=NatyMoonApp/src,natymoo-frontend/src
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**
+            -Dsonar.sourceEncoding=UTF-8
