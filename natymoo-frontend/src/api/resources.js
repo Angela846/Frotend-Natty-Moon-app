@@ -1,9 +1,5 @@
 import api from "./client";
 
-/**
- * Crea un cliente CRUD generico para un recurso REST del backend
- * (todos los endpoints del backend siguen el mismo patron GET/POST/PUT/DELETE).
- */
 export function createResource(path) {
   return {
     list: () => api.get(path).then((r) => r.data),

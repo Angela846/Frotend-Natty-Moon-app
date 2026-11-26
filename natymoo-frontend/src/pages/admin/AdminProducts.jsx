@@ -151,6 +151,7 @@ export default function AdminProducts() {
     const payload = {
       nombre: form.nombre,
       descripcion: form.descripcion,
+      categoriaId: Number(form.categoria),
       categoria: { id: Number(form.categoria) },
       precioBase: Number(form.precioBase),
       precioOferta: form.precioOferta ? Number(form.precioOferta) : null,
@@ -178,6 +179,7 @@ export default function AdminProducts() {
           const variantesCreadas = await Promise.all(
             variantesValidas.map((v) =>
               variantesApi.create({
+                productoId: creado.id,
                 producto: { id: creado.id },
                 sku: v.sku,
                 talla: v.talla,
@@ -194,6 +196,7 @@ export default function AdminProducts() {
           const imagenesCreadas = await Promise.all(
             imagenesConUrl.map((img, i) =>
               imagenesApi.create({
+                productoId: creado.id,
                 producto: { id: creado.id },
                 url: img.url.trim(),
                 orden: i,
@@ -267,6 +270,7 @@ export default function AdminProducts() {
     try {
       const actualizado = await productosApi.update(producto.id, {
         ...producto,
+        categoriaId: producto.categoria?.id ?? producto.categoriaId,
         activo: !producto.activo,
       });
       setProductos((prev) => prev.map((p) => (p.id === producto.id ? actualizado : p)));
@@ -301,6 +305,7 @@ export default function AdminProducts() {
 
     try {
       const creada = await variantesApi.create({
+        productoId,
         producto: { id: productoId },
         sku: nuevaVariante.sku,
         talla: nuevaVariante.talla,
@@ -343,6 +348,7 @@ export default function AdminProducts() {
     const imagenesDelProducto = imagenes.filter((i) => i.producto?.id === productoId);
     try {
       const creada = await imagenesApi.create({
+        productoId,
         producto: { id: productoId },
         url: nuevaImagenUrl.trim(),
         orden: imagenesDelProducto.length,

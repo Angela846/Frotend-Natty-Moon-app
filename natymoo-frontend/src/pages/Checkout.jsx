@@ -40,6 +40,7 @@ export default function Checkout() {
     ciudad: "",
     departamento: "",
     codigoPostal: "",
+    pais: "Colombia",
   });
   const [erroresDireccion, setErroresDireccion] = useState({});
 
@@ -58,7 +59,7 @@ export default function Checkout() {
     direccionesApi
       .list()
       .then((todas) => {
-        const propias = todas.filter((d) => d.usuario?.id === usuario.id);
+        const propias = todas.filter((d) => (d.usuarioId ?? d.usuario?.id) === usuario.id);
         setDirecciones(propias);
         const principal = propias.find((d) => d.esPrincipal) || propias[0];
         if (principal) setDireccionId(principal.id);
@@ -79,14 +80,25 @@ export default function Checkout() {
     setErroresDireccion(nuevosErrores);
     if (tieneErrores(nuevosErrores)) return;
 
-    const creada = await direccionesApi.create({
-      ...nuevaDireccion,
-      usuario: { id: usuario.id },
-      esPrincipal: direcciones.length === 0,
-    });
-    setDirecciones((prev) => [...prev, creada]);
-    setDireccionId(creada.id);
-    setMostrarForm(false);
+    try {
+      const creada = await direccionesApi.create({
+        ...nuevaDireccion,
+        usuarioId: usuario.id,
+        usuario: { id: usuario.id },
+        esPrincipal: direcciones.length === 0,
+      });
+      setDirecciones((prev) => [...prev, creada]);
+      setDireccionId(creada.id);
+      setMostrarForm(false);
+      setError("");
+    } catch (err) {
+      const errores = err.response?.data?.errores;
+      const primero = errores ? Object.values(errores)[0] : null;
+      setErroresDireccion({
+        general:
+          primero || err.response?.data?.mensaje || "No pudimos guardar la dirección.",
+      });
+    }
   }
 
   async function handleAplicarCupon() {
@@ -161,9 +173,9 @@ export default function Checkout() {
 
       // 2) Crear la orden
       const orden = await ordenesApi.create({
-        usuario: { id: usuario.id },
-        direccion: { id: direccionId },
-        cupon: cupon ? { id: cupon.id } : null,
+        usuarioId: usuario.id,
+        direccionId,
+        cuponId: cupon ? cupon.id : null,
         subtotal: total,
         descuento,
         costoEnvio: 0,
@@ -175,41 +187,59 @@ export default function Checkout() {
       await Promise.all(
         items.map(async (item) => {
           await detalleOrdenApi.create({
-            orden: { id: orden.id },
-            variante: { id: item.variante.id },
+            ordenCompraId: orden.id,
+            varianteProductoId: item.variante.id,
             cantidad: item.cantidad,
             precioUnitario: item.precioUnitario,
-            subtotal: item.precioUnitario * item.cantidad,
           });
 
+          // Descontar stock: el backend solo lo permite a ADMIN/EMPLEADO, asi que
+          // para un cliente normal responde 401/403. No debe tumbar la compra.
           const actual = variantesActuales.find((v) => v.id === item.variante.id);
-          await variantesApi.update(item.variante.id, {
-            ...actual,
-            stock: actual.stock - item.cantidad,
-          });
+          try {
+            await variantesApi.update(item.variante.id, {
+              ...actual,
+              stock: actual.stock - item.cantidad,
+            });
+          } catch (errStock) {
+            if (![401, 403].includes(errStock.response?.status)) throw errStock;
+            console.warn("No se pudo descontar el stock (sin permiso). Debe hacerlo el backend.");
+          }
         })
       );
 
       // 4) Historial inicial de la orden
-      await historialOrdenApi.create({
-        orden: { id: orden.id },
-        estado: "PENDIENTE",
-        comentario: "Orden creada",
-      });
+      // (Crear historial tambien es solo ADMIN/EMPLEADO: un 401/403 no debe tumbar la compra)
+      try {
+        await historialOrdenApi.create({
+          ordenCompraId: orden.id,
+          orden: { id: orden.id },
+          estado: "PENDIENTE",
+          comentario: "Orden creada",
+        });
+      } catch (errHist) {
+        if (![401, 403].includes(errHist.response?.status)) throw errHist;
+        console.warn("No se pudo crear el historial inicial (sin permiso).");
+      }
 
       // 5) Registrar el pago (queda pendiente hasta que el admin/empleado lo confirme)
       await pagosApi.create({
-        orden: { id: orden.id },
+        ordenId: orden.id,
         metodoPago,
         monto: totalFinal,
-        estado: "PENDIENTE",
+        estadoPago: "PENDIENTE",
         referenciaTransaccion: referenciaPago || null,
       });
 
       await vaciarCarritoLocal();
       navigate(`/pedidos`);
     } catch (err) {
-      setError("No pudimos procesar tu orden. Intenta de nuevo.");
+      console.error("Error al procesar la orden:", err.response?.status, err.response?.data ?? err.message);
+      const errores = err.response?.data?.errores;
+      const primero = errores ? Object.values(errores)[0] : null;
+      setError(
+        primero || err.response?.data?.mensaje || "No pudimos procesar tu orden. Intenta de nuevo."
+      );
     } finally {
       setProcesando(false);
     }
@@ -320,6 +350,7 @@ export default function Checkout() {
                 className="px-3 py-2 rounded-lg border border-plum/20 bg-white/60"
               />
             </div>
+            <ErrorMessage mensaje={erroresDireccion.general} />
             <div className="flex gap-3">
               <button
                 type="submit"

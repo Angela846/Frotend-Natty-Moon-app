@@ -21,11 +21,16 @@ export default function AdminRoles() {
     e.preventDefault();
     setError("");
     try {
-      const creado = await rolesApi.create({ nombre: nombre.toUpperCase() });
+      // En el backend el nombre del rol se llama "descripcion"
+      const creado = await rolesApi.create({ descripcion: nombre.toUpperCase() });
       setRoles((prev) => [...prev, creado]);
       setNombre("");
-    } catch {
-      setError("No se pudo crear el rol. Puede que ya exista.");
+    } catch (err) {
+      const errores = err.response?.data?.errores;
+      const primero = errores ? Object.values(errores)[0] : null;
+      setError(
+        primero || err.response?.data?.mensaje || "No se pudo crear el rol. Puede que ya exista."
+      );
     }
   }
 
@@ -64,7 +69,7 @@ export default function AdminRoles() {
       <div className="space-y-2 mt-4">
         {roles.map((rol) => (
           <div key={rol.id} className="flex items-center justify-between border border-plum/10 rounded-xl p-4 bg-white/40">
-            <p className="font-medium">{rol.nombre}</p>
+            <p className="font-medium">{rol.descripcion ?? rol.nombre}</p>
             <button
               onClick={() => handleEliminar(rol.id)}
               className="text-sm px-3 py-1.5 rounded-full border border-rose/30 text-rose hover:bg-rose hover:text-white transition-colors"

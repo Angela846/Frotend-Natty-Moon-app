@@ -16,18 +16,21 @@ const tabs = [
   { to: "/admin/direcciones", label: "Direcciones", icon: "📍" },
 ];
 
+// Color del item activo del menú. Para azul, usa: "bg-plum text-white"
+const ACTIVO = "bg-sun text-nocturne";
+
 export default function AdminLayout() {
   const { usuario, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[#1C1420] text-[#F1E9EC] flex flex-col sm:flex-row">
+    <div className="min-h-screen bg-nocturne text-blush flex flex-col sm:flex-row">
       {/* Sidebar */}
-      <aside className="sm:w-64 shrink-0 border-b sm:border-b-0 sm:border-r border-white/10 bg-[#16101A] sm:min-h-screen flex flex-col">
+      <aside className="sm:w-64 shrink-0 border-b sm:border-b-0 sm:border-r border-white/10 bg-[#070D26] sm:min-h-screen flex flex-col">
         <div className="p-6 border-b border-white/10">
           <Link to="/" className="inline-block bg-white/95 rounded-lg px-3 py-1.5">
             <Logo className="h-6 w-auto" textClassName="font-display text-lg text-plum" />
           </Link>
-          <p className="text-xs text-rose mt-2 uppercase tracking-wide">Panel administrativo</p>
+          <p className="text-xs text-sun mt-2 uppercase tracking-wide">Panel administrativo</p>
         </div>
 
         <nav className="p-3 flex sm:flex-col gap-1 overflow-x-auto sm:overflow-visible">
@@ -39,7 +42,7 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
                   isActive
-                    ? "bg-rose text-white"
+                    ? ACTIVO
                     : "text-white/60 hover:bg-white/5 hover:text-white"
                 }`
               }
@@ -57,7 +60,7 @@ export default function AdminLayout() {
             <Link to="/" className="text-xs text-white/50 hover:text-white">
               ← Volver a la tienda
             </Link>
-            <button onClick={logout} className="text-xs text-rose hover:text-rose-light text-left">
+            <button onClick={logout} className="text-xs text-sun hover:text-sun-light text-left">
               Cerrar sesión
             </button>
           </div>

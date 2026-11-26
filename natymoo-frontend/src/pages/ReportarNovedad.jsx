@@ -30,10 +30,10 @@ export default function ReportarNovedad() {
       .then(([n, o]) => {
         setMisNovedades(
           n
-            .filter((x) => x.usuario?.id === usuario.id)
+            .filter((x) => (x.usuarioId ?? x.usuario?.id) === usuario.id)
             .sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion))
         );
-        setMisOrdenes(o.filter((x) => x.usuario?.id === usuario.id));
+        setMisOrdenes(o.filter((x) => (x.usuarioId ?? x.usuario?.id) === usuario.id));
       })
       .catch(() => setError("No pudimos cargar tus novedades."))
       .finally(() => setCargando(false));
@@ -54,7 +54,9 @@ export default function ReportarNovedad() {
     setEnviando(true);
     try {
       const creada = await novedadesApi.create({
+        usuarioId: usuario.id,
         usuario: { id: usuario.id },
+        ordenCompraId: form.ordenId ? Number(form.ordenId) : null,
         orden: form.ordenId ? { id: Number(form.ordenId) } : null,
         asunto: form.asunto,
         descripcion: form.descripcion,
@@ -65,8 +67,14 @@ export default function ReportarNovedad() {
     } catch (err) {
       const erroresBackend = err.response?.data?.errores;
       const primerError = erroresBackend ? Object.values(erroresBackend)[0] : null;
+      console.error("Error al enviar la novedad:", err.response?.status, err.response?.data ?? err.message);
+      const sinPermiso = [401, 403].includes(err.response?.status);
       setError(
-        primerError || err.response?.data?.mensaje || "No pudimos enviar tu reporte. Intenta de nuevo."
+        primerError ||
+          err.response?.data?.mensaje ||
+          (sinPermiso
+            ? "Tu cuenta no tiene permiso para enviar reportes (error " + err.response.status + ")."
+            : "No pudimos enviar tu reporte. Intenta de nuevo.")
       );
     } finally {
       setEnviando(false);

@@ -1,5 +1,3 @@
-// Datos de las cuentas que reciben el pago por cada billetera digital.
-// CAMBIA estos numeros por los reales de Natymoo antes de salir a producción.
 export const CUENTAS_PAGO = {
   NEQUI: {
     numero: "3001234567",

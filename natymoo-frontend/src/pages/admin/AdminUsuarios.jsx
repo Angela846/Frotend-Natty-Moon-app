@@ -21,11 +21,22 @@ export default function AdminUsuarios() {
       .finally(() => setCargando(false));
   }, []);
 
+  // El rol puede venir como objeto, como id suelto o como texto ("ADMIN")
+  function rolIdDe(u) {
+    return (
+      u.rolId ??
+      u.rol?.id ??
+      roles.find((r) => (r.descripcion ?? r.nombre) === u.rol)?.id ??
+      ""
+    );
+  }
+
   async function handleCambiarRol(usuarioObj, rolId) {
     setError("");
     try {
       const actualizado = await usuariosApi.update(usuarioObj.id, {
         ...usuarioObj,
+        rolId: Number(rolId),
         rol: { id: Number(rolId) },
       });
       setUsuarios((prev) => prev.map((u) => (u.id === usuarioObj.id ? actualizado : u)));
@@ -39,6 +50,7 @@ export default function AdminUsuarios() {
     try {
       const actualizado = await usuariosApi.update(usuarioObj.id, {
         ...usuarioObj,
+        rolId: rolIdDe(usuarioObj) || undefined,
         activo: !usuarioObj.activo,
       });
       setUsuarios((prev) => prev.map((u) => (u.id === usuarioObj.id ? actualizado : u)));
@@ -75,13 +87,13 @@ export default function AdminUsuarios() {
 
             <div className="flex items-center gap-3">
               <select
-                value={u.rol?.id || ""}
+                value={rolIdDe(u)}
                 disabled={u.id === yo.id}
                 onChange={(e) => handleCambiarRol(u, e.target.value)}
                 className="px-3 py-1.5 rounded-full border border-plum/20 text-sm bg-white/60 disabled:opacity-50"
               >
                 {roles.map((r) => (
-                  <option key={r.id} value={r.id}>{r.nombre}</option>
+                  <option key={r.id} value={r.id}>{r.descripcion ?? r.nombre}</option>
                 ))}
               </select>
 

@@ -44,12 +44,12 @@ export default function AdminPagos() {
     if (tieneErrores(nuevosErrores)) return;
 
     try {
-      const creado = await pagosApi.create({
-        orden: { id: Number(form.ordenId) },
+           const creado = await pagosApi.create({
+        ordenId: Number(form.ordenId),
         metodoPago: form.metodoPago,
         monto: Number(form.monto),
         referenciaTransaccion: form.referenciaTransaccion,
-        estado: "PENDIENTE",
+        estadoPago: "PENDIENTE",
       });
       setPagos((prev) => [...prev, creado]);
       setForm({ ordenId: "", metodoPago: "TARJETA", monto: "", referenciaTransaccion: "" });

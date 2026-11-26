@@ -1,9 +1,26 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { productosApi, categoriasApi, imagenesApi, variantesApi } from "../api/resources";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
-import Logo from "../components/Logo";
 import { guardarCache, leerCache } from "../utils/cache";
+
+// Estrellas del hero: posicion (en %), tamano y desfase del brillo
+const ESTRELLAS = [
+  { top: "9%", left: "5%", tamano: "text-2xl", retraso: "0s" },
+  { top: "22%", left: "14%", tamano: "text-base", retraso: "1.2s" },
+  { top: "62%", left: "8%", tamano: "text-xl", retraso: "2.1s" },
+  { top: "84%", left: "19%", tamano: "text-sm", retraso: "0.6s" },
+  { top: "14%", left: "31%", tamano: "text-lg", retraso: "1.8s" },
+  { top: "74%", left: "36%", tamano: "text-2xl", retraso: "2.6s" },
+  { top: "8%", left: "48%", tamano: "text-sm", retraso: "0.9s" },
+  { top: "46%", left: "47%", tamano: "text-base", retraso: "1.5s" },
+  { top: "90%", left: "55%", tamano: "text-lg", retraso: "0.3s" },
+  { top: "12%", left: "66%", tamano: "text-xl", retraso: "2.4s" },
+  { top: "36%", left: "93%", tamano: "text-2xl", retraso: "1s" },
+  { top: "80%", left: "90%", tamano: "text-base", retraso: "1.9s" },
+  { top: "6%", left: "92%", tamano: "text-sm", retraso: "2.8s" },
+];
 
 const CLAVE_CACHE_CATALOGO = "catalogo";
 // El catalogo (precios, stock) puede cambiar, asi que la cache solo dura un
@@ -19,6 +36,14 @@ export default function Home() {
   const [categoriaActiva, setCategoriaActiva] = useState(null);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
+  const { hash } = useLocation();
+
+  // Link "Catálogo" del Navbar (/#catalogo): bajar a la sección del catálogo
+  useEffect(() => {
+    if (hash === "#catalogo") {
+      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [hash]);
 
   useEffect(() => {
     // 1) Si hay algo guardado de una visita reciente, mostrarlo ya mismo.
@@ -78,41 +103,47 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="container-natymoo pt-12 pb-16 sm:pt-20 sm:pb-24">
-        <div className="grid sm:grid-cols-5 gap-10 items-center">
-          <div className="sm:col-span-3">
-            <p className="text-rose font-medium text-sm mb-3">
-              Nueva colección de temporada
-            </p>
-            <h1 className="font-display text-4xl sm:text-6xl leading-[1.05] text-plum-ink">
-              Descansar bien
-              <br />
-              <span className="italic text-plum">empieza por lo que usas</span>
+      <section className="relative overflow-hidden bg-gradient-to-b from-nocturne to-nocturne-mid text-mist">
+        <div className="stars absolute inset-0" aria-hidden="true" />
+        {ESTRELLAS.map((e, i) => (
+          <span
+            key={i}
+            aria-hidden="true"
+            className={`twinkle absolute select-none ${e.tamano}`}
+            style={{ top: e.top, left: e.left, animationDelay: e.retraso }}
+          >
+            ✦
+          </span>
+        ))}
+        <div className="container-natymoo relative pt-16 pb-32 sm:pt-20 sm:pb-36 grid sm:grid-cols-2 gap-10 items-center">
+          <div>
+            <h1 className="font-display text-5xl sm:text-5xl lg:text-7xl leading-[1.04] text-mist">
+              Descansar bien empieza por lo que usas
             </h1>
-            <p className="mt-6 text-plum-ink/70 max-w-md text-lg">
+            <p className="mt-6 text-mist/80 max-w-md text-lg">
               Pijamas y ropa de estar en casa hechas con telas suaves,
               pensadas para tus noches más tranquilas.
             </p>
             <a
               href="#catalogo"
-              className="inline-block mt-8 px-7 py-3 rounded-full bg-plum text-blush font-medium hover:bg-plum-dark transition-colors"
+              className="inline-block mt-10 px-8 py-4 rounded-full bg-sun text-nocturne font-semibold hover:bg-sun-light transition-colors"
             >
               Ver catálogo
             </a>
           </div>
-          <div className="sm:col-span-2 relative">
-            <div className="aspect-square rounded-[2rem] bg-gradient-to-br from-rose/30 via-blush-deep to-sage/20 flex items-center justify-center p-10">
-              <Logo
-                className="w-full max-w-[220px] h-auto opacity-90 drop-shadow-sm"
-                textClassName="font-display text-5xl text-plum/30 rotate-[-6deg] select-none"
-              />
-            </div>
-          </div>
+          <img
+            src="/natymoon-hero.webp"
+            alt="NattyMoon: un osito sentado en la luna sostiene dos pijamas"
+            width="900"
+            height="900"
+            className="w-full max-w-[440px] justify-self-center sm:justify-self-end drop-shadow-[0_0_40px_rgba(255,210,63,0.25)]"
+          />
         </div>
       </section>
 
       {/* Catalogo */}
-      <section id="catalogo" className="container-natymoo pb-24">
+      <section id="catalogo" className="relative -mt-14 rounded-t-[3rem] bg-blush pt-14 scroll-mt-20">
+        <div className="container-natymoo pb-24">
         <div className="mb-6">
           <div className="relative max-w-md">
             <svg
@@ -147,7 +178,14 @@ export default function Home() {
         </div>
 
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-          <h2 className="text-2xl">Catálogo</h2>
+          <h2 className="text-4xl">
+            Catálogo
+            {!cargando && (
+              <span className="ml-3 text-base font-body text-plum-ink/40">
+                {productosFiltrados.length} {productosFiltrados.length === 1 ? "producto" : "productos"}
+              </span>
+            )}
+          </h2>
 
           <div className="flex gap-2 flex-wrap">
             <button
@@ -192,10 +230,12 @@ export default function Home() {
                 producto={producto}
                 imagenUrl={imagenPrincipal(producto.id)}
                 agotado={stockTotal(producto.id) === 0}
+                pocasUnidades={stockTotal(producto.id) > 0 && stockTotal(producto.id) <= 5}
               />
             ))}
           </div>
         )}
+        </div>
       </section>
     </div>
   );

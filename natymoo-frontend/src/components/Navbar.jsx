@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import Logo from "./Logo";
@@ -7,6 +7,16 @@ export default function Navbar() {
   const { usuario, logout, esAdmin, esEmpleado } = useAuth();
   const { cantidadTotal } = useCart();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // Si ya estamos en Home, la URL no cambia de pagina y el hash puede ser el
+  // mismo de antes, asi que bajamos al catalogo a mano.
+  function irAlCatalogo(e) {
+    if (pathname === "/") {
+      e.preventDefault();
+      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }
 
   async function handleLogout() {
     await logout();
@@ -14,38 +24,42 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-blush/90 backdrop-blur border-b border-plum/10">
+    <header className="sticky top-0 z-40 bg-nocturne/95 backdrop-blur border-b border-white/10">
       <div className="container-natymoo flex items-center justify-between h-20">
-        <Link to="/" className="flex items-center">
-          <Logo />
+        <Link to="/" className="inline-block bg-white/95 rounded-lg px-3 py-1.5">
+          <Logo className="h-6 w-auto" textClassName="font-display text-lg text-plum" />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-plum-ink">
-          <Link to="/" className="hover:text-rose transition-colors">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/70">
+          <Link
+            to={{ pathname: "/", hash: "#catalogo" }}
+            onClick={irAlCatalogo}
+            className="hover:text-white transition-colors"
+          >
             Catálogo
           </Link>
           {usuario && (
-            <Link to="/pedidos" className="hover:text-rose transition-colors">
+            <Link to="/pedidos" className="hover:text-white transition-colors">
               Mis pedidos
             </Link>
           )}
           {usuario && (
-            <Link to="/cuenta" className="hover:text-rose transition-colors">
+            <Link to="/cuenta" className="hover:text-white transition-colors">
               Mi cuenta
             </Link>
           )}
           {usuario && (
-            <Link to="/novedades" className="hover:text-rose transition-colors">
+            <Link to="/novedades" className="hover:text-white transition-colors">
               Reportar novedad
             </Link>
           )}
           {esAdmin && (
-            <Link to="/admin" className="hover:text-rose transition-colors">
+            <Link to="/admin" className="hover:text-white transition-colors">
               Panel admin
             </Link>
           )}
           {esEmpleado && (
-            <Link to="/empleado" className="hover:text-rose transition-colors">
+            <Link to="/empleado" className="hover:text-white transition-colors">
               Panel empleado
             </Link>
           )}
@@ -55,7 +69,7 @@ export default function Navbar() {
           {usuario && (
             <Link
               to="/favoritos"
-              className="text-plum-ink hover:text-rose transition-colors"
+              className="text-white/80 hover:text-rose transition-colors"
               aria-label="Favoritos"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -65,7 +79,7 @@ export default function Navbar() {
           )}
           <Link
             to="/carrito"
-            className="relative flex items-center gap-1 text-plum-ink hover:text-rose transition-colors"
+            className="relative flex items-center gap-1 text-white/80 hover:text-rose transition-colors"
             aria-label="Carrito de compras"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -82,12 +96,12 @@ export default function Navbar() {
 
           {usuario ? (
             <div className="flex items-center gap-3">
-              <span className="hidden sm:inline text-sm text-plum-ink/70">
+              <span className="hidden sm:inline text-sm text-white/60">
                 Hola, {usuario.nombre}
               </span>
               <button
                 onClick={handleLogout}
-                className="text-sm font-medium px-4 py-2 rounded-full border border-plum/20 hover:bg-plum hover:text-blush transition-colors"
+                className="text-sm font-medium px-4 py-2 rounded-full border border-white/20 text-white/90 hover:bg-rose hover:border-rose hover:text-white transition-colors"
               >
                 Salir
               </button>
@@ -95,7 +109,7 @@ export default function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="text-sm font-medium px-4 py-2 rounded-full bg-plum text-blush hover:bg-plum-dark transition-colors"
+              className="text-sm font-medium px-4 py-2 rounded-full bg-rose text-white hover:bg-rose-light transition-colors"
             >
               Iniciar sesión
             </Link>

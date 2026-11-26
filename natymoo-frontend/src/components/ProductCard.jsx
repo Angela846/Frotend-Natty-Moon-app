@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProductCard({ producto, imagenUrl, agotado }) {
+export default function ProductCard({ producto, imagenUrl, agotado, pocasUnidades }) {
   const { usuario } = useAuth();
+  const [imagenFalla, setImagenFalla] = useState(false);
   const { estaEnFavoritos, alternarFavorito } = useWishlist();
   const precio = Number(producto.precioOferta ?? producto.precioBase);
   const tieneOferta = producto.precioOferta && Number(producto.precioOferta) < Number(producto.precioBase);
@@ -21,28 +23,40 @@ export default function ProductCard({ producto, imagenUrl, agotado }) {
       to={`/productos/${producto.id}`}
       className="group block"
     >
-      <div className="aspect-[4/5] rounded-2xl bg-blush-soft border border-plum/10 overflow-hidden flex items-center justify-center relative">
-        {imagenUrl ? (
+      <div className="aspect-[4/5] rounded-[1.75rem] bg-gradient-to-b from-blush-soft to-blush-deep border border-plum/10 overflow-hidden flex items-center justify-center relative shadow-[0_14px_30px_-20px_rgba(43,58,143,0.35)]">
+        {imagenUrl && !imagenFalla ? (
           <img
             src={imagenUrl}
             alt={producto.nombre}
-            className={`w-full h-full object-cover ${agotado ? "opacity-40 grayscale" : ""}`}
+            onError={() => setImagenFalla(true)}
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${agotado ? "opacity-40 grayscale" : ""}`}
           />
         ) : (
-          <span className={`font-display text-plum/20 text-4xl select-none ${agotado ? "opacity-40" : ""}`}>
-            natymoo
-          </span>
+          <div className={`flex flex-col items-center gap-4 ${agotado ? "opacity-40" : ""}`}>
+            <span
+              className="block w-20 h-20 rounded-full bg-gradient-to-br from-sun-light to-sun shadow-[0_0_40px_8px_rgba(255,210,63,0.35)]"
+              aria-hidden="true"
+            />
+            <span className="font-display text-plum/50 text-xl select-none">natymoo</span>
+          </div>
         )}
         {agotado ? (
           <span className="absolute top-3 left-3 bg-plum-ink text-white text-xs font-medium px-3 py-1 rounded-full">
             Agotado
           </span>
         ) : (
-          tieneOferta && (
-            <span className="absolute top-3 left-3 bg-rose text-white text-xs font-medium px-3 py-1 rounded-full">
-              Oferta
-            </span>
-          )
+          <>
+            {tieneOferta && (
+              <span className="absolute top-3 left-3 bg-rose text-white text-xs font-semibold px-3 py-1 rounded-full">
+                Oferta
+              </span>
+            )}
+            {pocasUnidades && (
+              <span className={`absolute left-3 bg-moon text-night text-xs font-semibold px-3 py-1 rounded-full ${tieneOferta ? "top-11" : "top-3"}`}>
+                Quedan pocas
+              </span>
+            )}
+          </>
         )}
         {usuario && (
           <button
@@ -68,7 +82,7 @@ export default function ProductCard({ producto, imagenUrl, agotado }) {
           {producto.nombre}
         </h3>
         <div className="flex items-baseline gap-2 mt-1">
-          <span className="font-display text-lg text-plum">
+          <span className="font-display text-xl font-semibold text-plum">
             ${precio.toLocaleString("es-CO")}
           </span>
           {tieneOferta && (

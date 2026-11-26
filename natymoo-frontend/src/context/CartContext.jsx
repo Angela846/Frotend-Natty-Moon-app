@@ -10,6 +10,11 @@ const CartContext = createContext(null);
 // confirma con el servidor en segundo plano, no para ahorrarse la sincronizacion.
 const TTL_CARRITO_MS = 2 * 60 * 1000; // 2 minutos
 
+// El backend (DTO DetalleCarritoRequest) usa carritoCompraId y varianteProductoId.
+// Se aceptan tambien las otras formas por si una respuesta trae el objeto anidado.
+const carritoIdDe = (d) => d.carritoCompraId ?? d.carritoId ?? d.carrito?.id;
+const varianteIdDe = (d) => d.varianteProductoId ?? d.varianteId ?? d.variante?.id;
+
 export function CartProvider({ children }) {
   const { usuario } = useAuth();
   const [carrito, setCarrito] = useState(null);
@@ -37,11 +42,14 @@ export function CartProvider({ children }) {
       if (mostrarSpinner) setCargando(true);
       try {
         const todos = await carritosApi.list();
+        // El backend usa "usuarioId" (DTO); por si alguna respuesta trae el
+        // objeto "usuario", se aceptan las dos formas.
         let propio = todos.find(
-          (c) => c.usuario?.id === usuario.id && c.estado === "ACTIVO"
+          (c) => (c.usuarioId ?? c.usuario?.id) === usuario.id && c.estado === "ACTIVO"
         );
         if (!propio) {
           propio = await carritosApi.create({
+            usuarioId: usuario.id,
             usuario: { id: usuario.id },
             estado: "ACTIVO",
           });
@@ -49,9 +57,28 @@ export function CartProvider({ children }) {
         setCarrito(propio);
 
         const detalles = await detalleCarritoApi.list();
-        const itemsDelUsuario = detalles.filter((d) => d.carrito?.id === propio.id);
+        const propios = detalles.filter(
+          (d) => carritoIdDe(d) === propio.id
+        );
+        // Si el detalle solo trae "varianteId", se completa con la variante
+        // entera (producto, talla, color, stock) para poder mostrarla.
+        let itemsDelUsuario = propios;
+        if (propios.length > 0) {
+          const todasVariantes = await variantesApi.list();
+          itemsDelUsuario = propios.map((d) => {
+            const vid = varianteIdDe(d);
+            const completa = todasVariantes.find((v) => v.id === vid);
+            return completa ? { ...d, variante: completa } : d;
+          });
+        }
         setItems(itemsDelUsuario);
         guardarEnCache(usuario.id, propio, itemsDelUsuario);
+      } catch (err) {
+        console.error(
+          "Error del carrito:",
+          err.response?.status,
+          err.response?.data ?? err.message
+        );
       } finally {
         if (mostrarSpinner) setCargando(false);
       }
@@ -92,7 +119,7 @@ export function CartProvider({ children }) {
       stockReal = variante.stock; // si falla la consulta, seguimos con lo que teniamos
     }
 
-    const existente = items.find((i) => i.variante?.id === variante.id);
+    const existente = items.find((i) => varianteIdDe(i) === variante.id);
     const cantidadActualEnCarrito = existente?.cantidad || 0;
     const cantidadDeseada = cantidadActualEnCarrito + cantidad;
 
@@ -125,15 +152,18 @@ export function CartProvider({ children }) {
     let nuevosItems;
     if (existente) {
       const actualizado = await detalleCarritoApi.update(existente.id, {
-        ...existente,
+        id: existente.id,
+        carritoCompraId: carrito.id,
+        varianteProductoId: variante.id,
         cantidad: cantidadDeseada,
+        precioUnitario: existente.precioUnitario,
       });
       const itemCompleto = { ...actualizado, variante: varianteCompleta };
       nuevosItems = items.map((i) => (i.id === itemCompleto.id ? itemCompleto : i));
     } else {
       const nuevo = await detalleCarritoApi.create({
-        carrito: { id: carrito.id },
-        variante: { id: variante.id },
+        carritoCompraId: carrito.id,
+        varianteProductoId: variante.id,
         cantidad,
         precioUnitario,
       });
@@ -154,7 +184,7 @@ export function CartProvider({ children }) {
     // cantidad, para no dejar comprar mas de lo que hay disponible.
     let stockReal;
     try {
-      const fresca = await variantesApi.get(item.variante.id);
+      const fresca = await variantesApi.get(varianteIdDe(item));
       stockReal = fresca.stock;
     } catch {
       stockReal = item.variante?.stock ?? Infinity;
@@ -169,8 +199,11 @@ export function CartProvider({ children }) {
     }
 
     const actualizado = await detalleCarritoApi.update(detalleId, {
-      ...item,
+      id: detalleId,
+      carritoCompraId: carrito.id,
+      varianteProductoId: varianteIdDe(item),
       cantidad,
+      precioUnitario: item.precioUnitario,
     });
     // Mismo motivo que en agregarAlCarrito: la respuesta del backend trae
     // la variante "pelada" (solo id), asi que se preserva la variante
